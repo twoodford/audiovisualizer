@@ -8,11 +8,11 @@ import scipy.io as sio
 # The sample rate of the input matrix (Hz)
 SAMPLE_RATE=44100
 # Frequency range to display (audible is 16-16384Hz)
-DISPLAY_FREQ=(16, 2000)
+DISPLAY_FREQ=(16, 3000)
 # FPS of output (Hz)
 OUT_FPS = 30
 # Size of the moving average (s)
-MV_AVG_SIZE=1
+MV_AVG_SIZE=0.5
 
 def bin_approx_search(lst, tg):
     """
@@ -54,18 +54,16 @@ def plotSpectrum(y,samplerate):
 
     # We want to plot frequencies in the audible range
     
+    pylab.clf()
     pylab.plot(frq,abs(Y),'r') # plotting the spectrum
     pylab.xlabel('Freq (Hz)')
     pylab.ylabel('|Y(freq)|')
     pylab.ylim((0, 0.018))
 
-x=[1,4,5,7,8]
-print(bin_approx_search(x, 3))
-
 audio = sio.loadmat("song1.mat")['x']
 
 frame_increment = SAMPLE_RATE // OUT_FPS
-avg_len = MV_AVG_SIZE * SAMPLE_RATE
+avg_len = int(MV_AVG_SIZE * SAMPLE_RATE)
 frame = 0
 for start in range(0, audio.shape[0] - avg_len, frame_increment):
     print(start, start+avg_len)
