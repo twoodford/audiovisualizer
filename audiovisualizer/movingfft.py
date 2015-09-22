@@ -11,8 +11,28 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import numpy
 import numpy.fft
 import scipy
+
+def _bin_approx_search(lst, tg):
+    """
+    Find the index of the element in lst which is closest to the number tg
+    """
+    top = len(lst) - 1
+    bottom = 0
+    while top > bottom:
+        curri = (top - bottom)//2 + bottom
+        if lst[curri] < tg:
+            bottom = curri
+        else:
+            top = curri
+        if top - bottom == 1:
+            if abs(lst[top] - tg) < abs(lst[bottom] - tg):
+                return top
+            else:
+                return bottom
+    return top
 
 def fft_in_range(audiomatrix, startindex, endindex, channel):
     """
@@ -27,7 +47,8 @@ def fft_in_range(audiomatrix, startindex, endindex, channel):
     """
     n = endindex - startindex
     indat = audiomatrix[startindex:endindex, channel]
-    outdat = (numpy.fft.fft(indat)[range(n//2)])/y
+    outdat = (numpy.fft.fft(indat)[range(n//2)])/n
+    return outdat
 
 def get_x_axis(samplerate, samplelength):
     """
@@ -40,3 +61,48 @@ def get_x_axis(samplerate, samplelength):
     """
     time = samplelength / samplerate # The sample time of a single fft
     return scipy.arange(samplelength // 2) / time
+
+def moving_fft(audiomatrix, sampletime, fps, samplerate, channel=0):
+    """
+    Get a number of FFT samples over the time of an audio sample
+
+    This is basically like a moving average for DFTs
+
+    Args:
+        audiomatrix: A matrix of audio data with time for the first 
+            dimension and channel for the second dimension
+        sampletime: The length of a sample in seconds
+        fps: The number of output samples per second
+        samplerate: The sample frequency of the audio in hertz
+        channel: The audio channel to use
+    Returns:
+        A matrix where the first dimension is the frame number 
+        and the second dimension is the frequency
+    """
+    samplelength = int(sampletime * samplerate)
+    frame_increment = samplerate // fps
+    frame = 0
+    frames = (audiomatrix.shape[0] - samplelength) // frame_increment
+    #ret = numpy.zeros((frames, frame_increment//2), numpy.complex128)
+    ret = []
+    for startindex in range(0, audiomatrix.shape[0] - samplelength, frame_increment):
+        x = fft_in_range(audiomatrix, startindex, startindex + frame_increment, channel)
+        ret.append(x)
+    return numpy.array(ret)
+
+def freq_range_graph(fftmatrix, freqrange, samplerate, sampletime):
+    """
+    Create a row vector of the average amplitude of a frequency range over time
+
+    Args:
+        fftmatrix: The moving_fft() output
+        freqrange: A tuple of form (minimum frequency, maximum frequency)
+        samplerate: The sample frequency of the audio in hertz
+        sampletime: The length of a sample in seconds
+    """
+    frq = get_x_axis(samplerate, sampletime * samplerate)
+    bottomindex = _bin_approx_search(frq, freqrange[0])
+    topindex = _bin_approx_search(frq, freqrange[1])
+    sliced = fftmatrix[:,bottomindex:topindex]
+    print(sliced)
+    return numpy.average(sliced, 1)
