@@ -1,4 +1,5 @@
 # Just a test
+import audiovisualizer
 import numpy
 import numpy.fft as nfft
 import pylab
@@ -8,7 +9,7 @@ import scipy.io as sio
 # The sample rate of the input matrix (Hz)
 SAMPLE_RATE=44100
 # Frequency range to display (audible is 16-16384Hz)
-DISPLAY_FREQ=(16, 3000)
+DISPLAY_FREQ=(16, 2000)
 # FPS of output (Hz)
 OUT_FPS = 30
 # Size of the moving average (s)
@@ -40,17 +41,18 @@ def plotSpectrum(y,samplerate):
     n = len(y) # length of the signal
     k = scipy.arange(n)
     T = n/samplerate
-    frq = k/T # two sides frequency range
-    frq = frq[range(n//2)] # one side frequency range
+    frq = audiovisualizer.movingfft.get_x_axis(samplerate, n)
 
     Y = nfft.fft(y)/n # fft computing and normalization
     Y = Y[range(n//2)]
+    print(Y.shape)
 
     bottomindex = bin_approx_search(frq, DISPLAY_FREQ[0])
     topindex = bin_approx_search(frq, DISPLAY_FREQ[1])
 
     frq = frq[bottomindex:topindex]
     Y = Y[bottomindex:topindex]
+    print(Y.shape)
 
     # We want to plot frequencies in the audible range
     
@@ -68,5 +70,7 @@ frame = 0
 for start in range(0, audio.shape[0] - avg_len, frame_increment):
     print(start, start+avg_len)
     plotSpectrum(audio[start:start + avg_len, 0], SAMPLE_RATE)
+    pylab.show()
+    break
     pylab.savefig('frame_'+str(frame).zfill(4)+'.png', bbox_inches='tight')
     frame += 1
