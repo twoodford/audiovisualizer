@@ -135,5 +135,5 @@ def extract_freq(fftmatrix, backgroundfreq, targetfreq, samplerate, sampletime):
     """
     target = freq_range_graph(fftmatrix, targetfreq, samplerate, sampletime)
     background = freq_range_graph(fftmatrix, backgroundfreq, samplerate, sampletime)
-    return abs(target)/abs(background)
+    return abs(target)/(abs(background) + 1E-20)
 
