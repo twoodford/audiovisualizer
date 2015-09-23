@@ -104,5 +104,20 @@ def freq_range_graph(fftmatrix, freqrange, samplerate, sampletime):
     bottomindex = _bin_approx_search(frq, freqrange[0])
     topindex = _bin_approx_search(frq, freqrange[1])
     sliced = fftmatrix[:,bottomindex:topindex]
-    print(sliced)
     return numpy.average(sliced, 1)
+
+def isolate_freq_range(fftmatrix, freqrange, samplerate, sampletime):
+    """
+    Create a moving DFT matrix with only the given frequency range
+
+    Args:
+        fftmatrix: The moving_fft() output
+        freqrange: A tuple of form (minimum frequency, maximum frequency)
+        samplerate: The sample frequency of the audio in hertz
+        sampletime: The length of a sample in seconds
+    """
+    frq = get_x_axis(samplerate, sampletime * samplerate)
+    bottomindex = _bin_approx_search(frq, freqrange[0])
+    topindex = _bin_approx_search(frq, freqrange[1])
+    return fftmatrix[:,bottomindex:topindex]
+
