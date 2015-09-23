@@ -13,9 +13,9 @@ DISPLAY_FREQ=(16, 1000)
 # FPS of output (Hz)
 OUT_FPS = 30
 # Size of the moving average (s)
-SAMPLE_TIME=0.5
+SAMPLE_TIME=0.9
 # Output image size
-OUT_SIZE = (500, 1000)
+OUT_SIZE = (400, 1000)
 
 audio = scipy.io.loadmat("song1.mat")['x']
 mf = audiovisualizer.movingfft.moving_fft(audio, SAMPLE_TIME, OUT_FPS, SAMPLE_RATE)
@@ -24,20 +24,16 @@ mf = audiovisualizer.movingfft.isolate_freq_range(mf, DISPLAY_FREQ, SAMPLE_RATE,
 print(mf.shape)
 
 # Downsample the DFT matrix
-tfactor = int(mf.shape[0] / OUT_SIZE[1])
-afactor = mf.shape[1] / OUT_SIZE[0]
-print(tfactor, afactor)
-mfd = scipy.signal.decimate(mf, tfactor, axis=0)
-if afactor > 1:
-    mfd = scipy.signal.decimate(mf, int(afactor), axis=1)
+if mf.shape[0] / OUT_SIZE[1] > mf.shape[1] / OUT_SIZE[0]:
+    mfd = scipy.signal.decimate(mf, int(mf.shape[0] / OUT_SIZE[1]), axis=0)
 else:
-    mfd = scipy.signal.resample(mf, 2,2)
+    mfd = scipy.signal.decimate(mf, int(mf.shape[1] / OUT_SIZE[0]), axis=1)
 
 image = PIL.Image.new("L", OUT_SIZE)
 imgdr = PIL.ImageDraw.Draw(image)
 
 for x in range(OUT_SIZE[0]):
     for y in range(OUT_SIZE[1]):
-        imgdr.point((x,y), mfd[y,x]*256*10)
+        imgdr.point((x,y), mfd[y,x//2]*256*100)
 
 image.save(open("fun.png", "wb"), "PNG")
