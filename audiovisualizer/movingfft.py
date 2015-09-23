@@ -121,3 +121,19 @@ def isolate_freq_range(fftmatrix, freqrange, samplerate, sampletime):
     topindex = _bin_approx_search(frq, freqrange[1])
     return fftmatrix[:,bottomindex:topindex]
 
+def extract_freq(fftmatrix, backgroundfreq, targetfreq, samplerate, sampletime):
+    """
+    Extract occurrences of a specific note of drum by comparing its frequencies 
+    to background frequencies
+
+    Args:
+        fftmatrix: The moving_fft() output
+        backgroundfreq: Frequencies to look for background noise
+        targetfreq: Frequency range of the instrument
+        samplerate: The sample frequency of the audio in hertz
+        sampletime: The length of a sample in seconds
+    """
+    target = freq_range_graph(fftmatrix, targetfreq, samplerate, sampletime)
+    background = freq_range_graph(fftmatrix, backgroundfreq, samplerate, sampletime)
+    return abs(target)/abs(background)
+
