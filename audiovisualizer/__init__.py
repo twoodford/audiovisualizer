@@ -13,3 +13,4 @@
 # under the License.
 
 from . import movingfft
+from . import widgets
