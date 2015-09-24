@@ -15,28 +15,32 @@ OUT_FPS = 30
 # Size of the moving average (s)
 SAMPLE_TIME=0.5
 # Output image size
-OUT_SIZE = (400, 400)
+OUT_SIZE = (800, 400)
 
 audio = scipy.io.loadmat("song1.mat")['x']
 mf = audiovisualizer.movingfft.moving_fft(audio, SAMPLE_TIME, OUT_FPS, SAMPLE_RATE)
-print(mf.shape)
 mf = audiovisualizer.movingfft.isolate_freq_range(mf, DISPLAY_FREQ, SAMPLE_RATE, SAMPLE_TIME)
-print(mf.shape)
 
 drum1 = audiovisualizer.movingfft.extract_freq(mf, DISPLAY_FREQ, (320,335), SAMPLE_RATE, SAMPLE_TIME)
 
+FC=10/(0.5*SAMPLE_RATE)
+N=1001
+a=1
+b=scipy.signal.firwin(N, cutoff=FC, window='hamming')
+#lowpassed = scipy.signal.lfilter(b, a, audio)
+mf2 = audiovisualizer.movingfft.moving_fft(audio, 1.5, OUT_FPS, SAMPLE_RATE)
+#mf2 = audiovisualizer.movingfft.normalize_freq(mf2)
+print(mf2)
+fvis = audiovisualizer.movingfft.isolate_freq_range(mf2, (500, 1500), SAMPLE_RATE, SAMPLE_TIME)
+
+
+
 visualizers = [
-        audiovisualizer.widgets.DrumCircle(drum1, (100, 100), 50, 100, (50, 230, 30))
+        audiovisualizer.widgets.DrumCircle(drum1, (100, 100), 50, 100, ((0, (50, 230, 30)), (1455, (200, 0, 200)))),
+        audiovisualizer.widgets.FrequencyPoints(fvis, [(200, 0), (1600, 800)], ((0, (0, 0, 255)),), 60),
+        audiovisualizer.widgets.MeterDisplay(fvis, 17, (100, 350), 80, (0,240,255))
         ]
 
-background = PIL.Image.new("RGBA", OUT_SIZE)
-PIL.ImageDraw.Draw(background).rectangle([(0,0), OUT_SIZE], fill=(0,0,0,255))
-frame = 0
-for sindex in range(0, mf.shape[0]):
-    image = PIL.Image.new("RGBA", OUT_SIZE)
-    imgdr = PIL.ImageDraw.Draw(image)
-    imgdr.rectangle([(0,0), (100,100)], fill=(100, 0, 0, 255))
-    for vis in visualizers:
-        vis.display(sindex, imgdr)
-    PIL.Image.alpha_composite(background, image).save(open("frame_"+str(frame).zfill(4)+".png", "wb"), "PNG")
+for frame, image in enumerate(audiovisualizer.animator.make_frames(visualizers, mf.shape[0], OUT_SIZE)):
+    image.save(open("frame_"+str(frame).zfill(4)+".png", "wb"), "PNG")
     frame += 1
