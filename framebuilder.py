@@ -15,7 +15,7 @@ OUT_FPS = 30
 # Size of the moving average (s)
 SAMPLE_TIME=0.5
 # Output image size
-OUT_SIZE = (800, 400)
+OUT_SIZE = (1920, 1080)
 
 audio = scipy.io.loadmat("song1.mat")['x']
 mf = audiovisualizer.movingfft.moving_fft(audio, SAMPLE_TIME, OUT_FPS, SAMPLE_RATE)
@@ -36,9 +36,13 @@ fvis = audiovisualizer.movingfft.isolate_freq_range(mf2, (500, 1500), SAMPLE_RAT
 
 
 visualizers = [
-        audiovisualizer.widgets.DrumCircle(drum1, (100, 100), 50, 100, ((0, (50, 230, 30)), (1455, (200, 0, 200)))),
-        audiovisualizer.widgets.FrequencyPoints(fvis, [(200, 0), (1600, 800)], ((0, (0, 0, 255)),), 60),
-        audiovisualizer.widgets.MeterDisplay(fvis, 17, (100, 350), 80, (0,240,255))
+        audiovisualizer.widgets.DrumCircle(drum1, (200, 250), 100, 200, ((0, (50, 230, 30)), (1455, (200, 0, 200)), (1770, (50, 230, 30)))),
+        audiovisualizer.widgets.FrequencyPoints(fvis, [(500, 0), (3840, 2160)], (
+            (0, (0, 0, 255)), (420,(2, 255, 141)), (1380, (2, 100, 255)), 
+            (1800, (2, 255, 57)), (2760, (91, 255, 181)), (3600, (63, 5, 255)),
+            (3690, (221, 22, 78))
+            ), 60),
+        audiovisualizer.widgets.MeterDisplay(fvis, 17, (200, 700), 160, (0,240,255))
         ]
 
 for frame, image in enumerate(audiovisualizer.animator.make_frames(visualizers, mf.shape[0], OUT_SIZE)):

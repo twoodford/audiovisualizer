@@ -12,5 +12,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
+from . import animator
 from . import movingfft
 from . import widgets
