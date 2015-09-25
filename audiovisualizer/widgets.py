@@ -96,8 +96,7 @@ class FrequencyPoints(Widget):
                         abs(self._fftmatrix[framenum - y, x]), framenum - y)
                 iimgdr.point((x,y), color)
         rectimg = iimg.resize(self._rect_size(), resample=Image.BICUBIC)
-        print(self._ampl_color(1, framenum))
-        target.bitmap(self._bounds[0], rectimg, fill=(0,0,255,255))
+        target.bitmap(self._bounds[0], rectimg, fill=self._ampl_color(1/5000, framenum))
 
     def _rect_size(self):
         """Returns the (width, height) of the draw rect"""
