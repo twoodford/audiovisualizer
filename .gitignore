@@ -61,3 +61,7 @@ target/
 
 # OSX
 .DS_Store
+
+# Things that the program outputs
+frame_*.png
+*.mp4
